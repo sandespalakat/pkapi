@@ -64,6 +64,8 @@ class AuthController extends Controller
     public function show($id)
     {
             $user=User::find($id);
+           $this->authorize('view',$user);
+
             if($user)
             return response(['data'=>$user],200);
             else

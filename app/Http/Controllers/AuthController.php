@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -10,26 +12,16 @@ class AuthController extends Controller
 {
     //
 
-    public function register(Request $request){
+    public function register(RegisterRequest $request){
         // $fields = $request->validate([
         //     'first_name' => 'required|string',
         //     'last_name' => 'required|string',
         //     'email' => 'required|email|unique:users,email',
         //     'password' => 'required|string|confirmed',
         // ]);
-        $fields = $request->validate([
-            'name' => 'required|string',
-            // 'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|confirmed',
-        ]);
+        $fields = $request->validated();
 
-        $user = User::create([
-            'name' => $fields['name'],
-            // 'name' => $fields['name'],
-            'email' => $fields['email'],
-            'password' => bcrypt($fields['password']),
-        ]);
+        $user = User::create($fields);
 
         $token = $user->createToken('myAppToken')->plainTextToken;
 
@@ -40,11 +32,8 @@ class AuthController extends Controller
         return response($response, 201);
     }
 
-    public function login(Request $request){
-        $fields = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+    public function login(LoginRequest $request){
+        $fields = $request->validated();
 
         $user = User::where('email',$fields['email'])->first();
     if(!$user || !Hash::check($fields['password'], $user->password))
@@ -69,5 +58,18 @@ class AuthController extends Controller
       return response ([
           'message'=>"Logged out"
       ]);
+    }
+
+
+    public function show($id)
+    {
+            $user=User::find($id);
+            if($user)
+            return response(['data'=>$user],200);
+            else
+            {
+                return response(['message'=>"Not found"],401);
+
+            }
     }
 }

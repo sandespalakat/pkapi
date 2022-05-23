@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -20,7 +21,12 @@ class AuthController extends Controller
         //     'password' => 'required|string|confirmed',
         // ]);
         $fields = $request->validated();
-
+        $uuid = (string) Str ::uuid();
+        while(User::where('uuid', '=', $uuid)->count() > 0) {
+            $uuid = (string) Str ::uuid();
+        }
+        $fields['uuid'] = $uuid;
+        // dd($uuid);
         $user = User::create($fields);
 
         $token = $user->createToken('myAppToken')->plainTextToken;
